@@ -50,7 +50,7 @@ namespace BOM
                     Console.WriteLine("The file: " + s + " DOESN'T exist in BOM report file");
                 }
             }
-            Console.WriteLine("Press ENTER to exit");
+            Console.WriteLine("Press ENTER to exit");//some comment2
             Console.ReadLine();
         }
     }

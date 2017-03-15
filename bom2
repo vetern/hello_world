@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
+
+namespace PCBOM
+{
+    
+
+    class ContentResultCompare
+    {
+        static string[] pathToIgnore = {
+            "GlobalAssemblyCache\\bin",
+            "SystemFolder",
+            "TARGETDIR\\AppServer\\webapps\\site.war",
+            "TARGETDIR\\AppServer\\webapps\\site.war\\images",
+            "TARGETDIR\\AppServer\\webapps\\site.war\\images\\gui",
+            "TARGETDIR\\AppServer\\webapps\\site.war\\images\\gui\\buttons",
+            "TARGETDIR\\AppServer\\webapps\\site.war\\images\\masthead"
+
+        };
+
+        static bool In(string str, string[] arr)
+        {
+            foreach(var st in arr)
+                if (st.Equals(str))
+                    return true;
+
+            return false;
+        }
+
+        static void Main(string[] args)
+        {
+            Console.Write("Please enter the FilesToCopy path: ");
+            string pathContent = Console.ReadLine();   //Wait for path to the FilesToCopy.proj
+
+            Console.Write("Please enter the BOM report path: ");
+            string pathBOM = Console.ReadLine();    //Wait for path to the BOM check report file
+            string BOMfile = System.IO.File.ReadAllText(pathBOM);   // 
+
+            string PCxml_differences_file = @"E:\docs\Visual Studio 2015\Projects\PCBOMcheck\PCBOM\PCxml_FilesToCopy_diff.txt";
+            string PCxml_defferences = System.IO.File.ReadAllText(PCxml_differences_file);
+
+            XmlDocument xdoc = new XmlDocument();
+            xdoc.Load(pathContent);
+
+            XmlElement xRoot = xdoc.DocumentElement;
+
+            var fileRelPaths = xRoot.GetElementsByTagName("PatchContentFile");
+
+            List<string> dllList = new List<string>();                
+
+            foreach (XmlElement e in fileRelPaths)
+            {
+
+                var fileName = e.GetAttribute("Name");
+                var relpath = e.GetAttribute("RelativePath");
+
+                if (!In(relpath, pathToIgnore)&&!PCxml_defferences.Contains(fileName))
+                    dllList.Add(fileName.Trim());
+
+            }
+
+            foreach (string s in dllList.ToArray())
+            {
+                if (!BOMfile.Contains(s))
+                {
+                    Console.WriteLine("The file: " + s + " DOESN'T exist in BOM report file");
+                }
+            }
+            Console.WriteLine("Press ENTER to exit");//some comment3
+            Console.ReadLine();//some comment1
+        }
+    }
+}
+
+
